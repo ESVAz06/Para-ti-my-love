@@ -240,7 +240,7 @@
     const historiasFotos = {
       0: { 
         titulo: "Mi theriansita", 
-        texto: "Todavía recuerdo el día en el que te comiste paté de gato pensando que era un yogurt en sobrecito. Y... nos cagabamos de risa ese día. Eso que nos estábamos conociendo. Pero cada vez que veo la foto, me da risa y ternura jsjsj,  esos momentos los cuales siempre voy a atesorar. Te amo, mi theriansita." 
+        texto: "Todavía recuerdo el día en el que te comiste paté de gato pensando que era un yogurt en sobrecito. Y... nos cagabamos de risa ese día. Eso que nos estábamos conociendo. Pero cada vez que veo la foto, me da risa y ternura jsjsj, esos momentos los cuales siempre voy a atesorar. Te amo, mi theriansita." 
       },
       1: { 
         titulo: "Paseando a Bambie", 
@@ -256,7 +256,7 @@
       },
       4: { titulo: "Toda una diva", texto: "Aqui receurdo que te puse mi polera, y te quedo perfecto, enserio!! la mayoria de mis casacas o accesorios te quedan divinos, resalta aun mas tu bellesa mi amorcito, aqun sin no lo cesites, porque incluso sin arreglarte eres completamente divina, TE AMO." },
       5: { titulo: "2 angelitos", texto: "Como olvidar cuadno preguntamos a tu beba, como serian nuestros hijitos, Dante y Danae, y aunque te dije esa vez, que yo quiero un niño, te juro que una princesita me haria muy feliz, daria todo por ella, de eso nunca lo dudes amor." },
-      6: { titulo: "Mi sugar", texto: "No solo en este momento, sino que desde que nos conocemos, me has entendido cuando no eh tenido dinero, me acompañabas a clases, para poder pasar tiempo juuntos e incluso me invitavas tus cosas favorita, y hasta ahora lo haces, te juro que nadie lo ha hecho por mi ante, eso valoro demasiad de ti, y no me hace falta mas razones para elejirte siempre por encima de todo.<" },
+      6: { titulo: "Mi sugar", texto: "No solo en este momento, sino que desde que nos conocemos, me has entendido cuando no eh tenido dinero, me acompañabas a clases, para poder pasar tiempo juuntos e incluso me invitavas tus cosas favorita, y hasta ahora lo haces, te juro que nadie lo ha hecho por mi ante, eso valoro demasiad de ti, y no me hace falta mas razones para elejirte siempre por encima de todo." },
       7: { titulo: "SQUINKLES FACIALES", texto: "Despues del rochimochi parcial, no hicimos limpieza facial, ojito que primera vez que me hacia uno, y fue de lo mejor, por que estaba a tu lado, te juro que cosas asi talvez no se me ocurran ami, pero siempre te dire si a probar cosas nueva, y quiero que tu tambien digas si cuando las proponga." },
       8: { titulo: "Pulseritas", texto: "COMO OLVIDAR, QUE SUFRI VARIOS INTENTOS PARA HACERTE TU PULSERITA, Y AL FINAL QUEDO BONITA, ME GUSTO QUE TE ENCANTARA AMOR AUNQUE YA NO LAS USEMOS" },
       9: { titulo: "TE AMOOO", texto: "Este dia.., casi termina mal, eneserio me acuerdo que pasamos un mal rato, pero no me arrepiento de arrodillarme y hacerte la promesa, que quiero estar contigo, y pasar de todo contigo en la malas y en las buenas amorcito" },
@@ -375,7 +375,6 @@
       canvas.height = 512;
       const ctx = canvas.getContext('2d');
 
-      // Degradado tipo humo/polvo cósmico rosa pastel
       const grad = ctx.createRadialGradient(256, 256, 180, 256, 256, 256);
       grad.addColorStop(0, 'rgba(255, 182, 193, 0.6)');
       grad.addColorStop(0.5, 'rgba(219, 112, 147, 0.3)');
@@ -391,7 +390,7 @@
 
     // --- 3. FOTO CUADRADA 1:1 CON BORDE NEBULOSA ---
     const photoTextureLoader = new THREE.TextureLoader();
-    const photoGeom = new THREE.PlaneGeometry(6.8, 6.8); // Formato Cuadrado Perfecto
+    const photoGeom = new THREE.PlaneGeometry(6.8, 6.8);
     const photoMat = new THREE.MeshBasicMaterial({
       side: THREE.DoubleSide,
       transparent: true,
@@ -402,7 +401,6 @@
     photoMesh.position.set(0, -1.2, 0); 
     heartGroup.add(photoMesh);
 
-    // Aura de resplandor espacial detrás del cuadrado
     const auraGeom = new THREE.PlaneGeometry(8.5, 8.5);
     const auraMat = new THREE.MeshBasicMaterial({
       map: auraSquareTexture,
@@ -415,7 +413,6 @@
     auraMesh.position.set(0, -1.2, -0.05);
     heartGroup.add(auraMesh);
 
-    // FUNCIÓN PARA AJUSTAR IMÁGENES HORIZONTALES / VERTICALES AL CUADRADO
     function fitTextureToSquare(texture) {
       const image = texture.image;
       if (!image) return;
@@ -423,17 +420,14 @@
 
       texture.matrixAutoUpdate = false;
       if (aspect > 1) {
-        // Imagen Horizontal
         texture.repeat.set(1 / aspect, 1);
         texture.offset.set((1 - 1 / aspect) / 2, 0);
       } else {
-        // Imagen Vertical
         texture.repeat.set(1, aspect);
         texture.offset.set(0, (1 - aspect) / 2);
       }
     }
 
-    // ARREGLO DE 15 FOTOS
     const misFotos = [
       'foto1.jpg', 'foto2.jpg', 'foto3.jpg', 'foto4.jpg', 'foto5.jpg',
       'foto6.jpg', 'foto7.jpg', 'foto8.jpg', 'foto9.jpg', 'foto10.jpg',
@@ -468,7 +462,7 @@
       heartWaves.push({ mesh: waveMesh, scale: heartGroup.scale.x, opacity: 0.65 });
     }
 
-    // --- 5. ELEMENTOS FLOTANTES (CORAZONES 💖) ---
+    // --- 5. ELEMENTOS FLOTANTES ---
     const floatingItems = [];
     function createFloatingItem() {
       if (floatingItems.length > 20) return;
@@ -493,7 +487,7 @@
       floatingItems.push({ sprite, speedY: 0.025 + Math.random() * 0.02, opacity: 0.85 });
     }
 
-    // --- 6. FRASES ---
+    // --- 6. FRASES (CORREGIDAS LAS COMAS FALTANTES) ---
     const frases = [
       "Mi Theriancita 🐾", 
       "Te amo con el alma ❤️", 
@@ -511,9 +505,9 @@
       "Solo tú y yo 👩‍❤️‍👨",
       "Nadie brilla como tú ✨",
       "Es que tú eres una Therian 🐾",
-      "Somos virolos❤️"
-      "Solo en tus labios hay calma❤️"
-      "Mis desvelos tienen tu voz❤️"
+      "Somos virolos❤️",
+      "Solo en tus labios hay calma❤️",
+      "Mis desvelos tienen tu voz❤️",
       "Mi pinchechita hemocha😘"
     ];
 
@@ -568,7 +562,7 @@
       });
     });
 
-    // --- LÓGICA INTRO ---
+    // --- LÓGICA INTRO Y TRANSICIÓN ROBUSTA ---
     const textoIntro = "Tal vez no te puedo dar algo físico o algún detalle muy hermoso, pero no quería quedarme sin hacer nada, así que espero que te guste, Theriancita";
     const typewriterElement = document.getElementById('typewriter');
     const startScreen = document.getElementById('start-screen');
@@ -576,14 +570,13 @@
 
     let charIndex = 0;
     let musicStarted = false;
-    let holePhase = false;
     let introFinished = false;
 
     function typeWriterEffect() {
       if (charIndex < textoIntro.length) {
         typewriterElement.textContent += textoIntro.charAt(charIndex);
         charIndex++;
-        setTimeout(typeWriterEffect, 100);
+        setTimeout(typeWriterEffect, 60);
       } else {
         const dotsSpan = document.createElement('span');
         dotsSpan.className = 'loading-dots';
@@ -591,17 +584,31 @@
       }
     }
 
-    window.addEventListener('click', startExperience, { once: true });
-    window.addEventListener('keydown', startExperience, { once: true });
-
     function startExperience() {
       if (!musicStarted) {
         musicStarted = true;
-        music.play();
         document.getElementById('hint').style.display = 'none';
+        music.play().catch(e => console.log("Audio esperando interacción o no encontrado"));
         typeWriterEffect();
+        
+        // Transición automática a la escena 3D después de escribir la carta
+        setTimeout(() => {
+          finishIntro();
+        }, 9000);
+      } else {
+        // Un segundo clic salta directamente la intro
+        finishIntro();
       }
     }
+
+    function finishIntro() {
+      if (introFinished) return;
+      startScreen.classList.add('hidden');
+      document.getElementById('ui').classList.add('visible');
+      introFinished = true;
+    }
+
+    startScreen.addEventListener('click', startExperience);
 
     // --- ANIMACIÓN PRINCIPAL ---
     let time = 0;
@@ -610,30 +617,18 @@
       time += 0.03;
 
       if (musicStarted && !introFinished) {
-        let currentTime = music.currentTime;
-
-        if (currentTime >= 18 && currentTime < 21) {
-          if (!holePhase) {
-            holePhase = true;
-            startScreen.classList.add('hidden');
-          }
-          camera.position.z -= 0.65;
-          starField.rotation.z += 0.09;
-        } 
-        else if (currentTime >= 21) {
-          const scaleVal = THREE.MathUtils.lerp(galaxyGroup.scale.x, 1, 0.08);
-          heartGroup.scale.set(scaleVal, scaleVal, scaleVal);
-          galaxyGroup.scale.set(scaleVal, scaleVal, scaleVal);
-
-          if (Math.abs(galaxyGroup.scale.x - 1) < 0.05) {
-            introFinished = true;
-          }
-
-          document.getElementById('ui').classList.add('visible');
+        let currentTime = music.currentTime || 0;
+        if (currentTime >= 18 || charIndex >= textoIntro.length) {
+          camera.position.z -= 0.15;
+          starField.rotation.z += 0.02;
         }
       }
 
       if (introFinished) {
+        const scaleVal = THREE.MathUtils.lerp(galaxyGroup.scale.x, 1, 0.08);
+        heartGroup.scale.set(scaleVal, scaleVal, scaleVal);
+        galaxyGroup.scale.set(scaleVal, scaleVal, scaleVal);
+
         const beat = 1 + Math.sin(time * 3) * 0.07 + Math.pow(Math.sin(time * 6), 2) * 0.03;
         heartGroup.scale.set(beat, beat, beat);
 
@@ -680,7 +675,7 @@
     }
     animate();
 
-    // MODAL DE MOMENTOS AL HACER CLIC EN LA FOTO CUADRADA
+    // MODAL DE MOMENTOS AL HACER CLIC EN LA FOTO
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     const modal = document.getElementById('cartaModal');
