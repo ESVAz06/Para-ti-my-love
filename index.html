@@ -26,7 +26,7 @@
       z-index: 1;
     }
 
-    /* CAPA INTRO CINEMÁTICA CON MÁQUINA DE ESCRIBIR */
+    /* CAPA INTRO CINEMÁTICA */
     #start-screen {
       position: fixed;
       top: 0;
@@ -217,7 +217,7 @@
       <div id="cartaContenido">
         <p><strong>Mi Teriancita hermosa,</strong></p>
         <p>
-          [AQUÍ IRÁ TU CARTA ESCRITA, ESVA].
+          [AQUÍ ESCRIBES TU CARTA CON TODO EL LÍRICO].
         </p>
       </div>
       <div class="card-footer">💌✨</div>
@@ -248,7 +248,7 @@
     const galaxyGroup = new THREE.Group();
     scene.add(galaxyGroup);
 
-    // --- 1. ESTRELLAS DEL UNIVERSO ---
+    // --- 1. ESTRELLAS ---
     const starCount = 3500;
     const starGeometry = new THREE.BufferGeometry();
     const starPos = new Float32Array(starCount * 3);
@@ -263,7 +263,7 @@
     const starField = new THREE.Points(starGeometry, starMaterial);
     galaxyGroup.add(starField);
 
-    // --- 2. CORAZÓN 3D PRINCIPAL ---
+    // --- 2. CORAZÓN 3D ---
     const heartGroup = new THREE.Group();
     const heartCount = 4000;
     const heartPos = new Float32Array(heartCount * 3);
@@ -296,19 +296,23 @@
     heartGroup.scale.set(0, 0, 0);
     galaxyGroup.scale.set(0, 0, 0);
 
-    // --- 3. FOTO ENCAJADA PERFECTAMENTE DENTRO DEL CORAZÓN ---
+    // --- 3. FOTO AJUSTADA (REBAJADA Y CENTRADA PERFECTAMENTE) ---
     const photoTextureLoader = new THREE.TextureLoader();
-    // Tamaño 5.8 x 10.3 ajustado para llenar armónicamente el hueco del corazón 9:16
-    const photoGeom = new THREE.PlaneGeometry(5.8, 10.3);
+    // Escala 5.2 x 9.2: calza perfecta sin salir por la hendidura superior
+    const photoGeom = new THREE.PlaneGeometry(5.2, 9.2);
     const photoMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true });
     const photoMesh = new THREE.Mesh(photoGeom, photoMat);
     
-    // Elevada ligeramente a Y=1.25 para hacer contacto perfecto con la hendidura superior
-    photoMesh.position.set(0, 1.25, 0); 
+    // Posición Y bajada a 0.25 para centrarla en el corazón
+    photoMesh.position.set(0, 0.25, 0); 
     heartGroup.add(photoMesh);
 
-    // Puedes colocar aquí los enlaces "Raw" de GitHub si no abre localmente
-    const misFotos = ['foto1.jpg', 'foto2.jpg', 'foto3.jpg'];
+    // ARREGLO DE 15 FOTOS
+    const misFotos = [
+      'foto1.jpg', 'foto2.jpg', 'foto3.jpg', 'foto4.jpg', 'foto5.jpg',
+      'foto6.jpg', 'foto7.jpg', 'foto8.jpg', 'foto9.jpg', 'foto10.jpg',
+      'foto11.jpg', 'foto12.jpg', 'foto13.jpg', 'foto14.jpg', 'foto15.jpg'
+    ];
     const photoTextures = [];
 
     misFotos.forEach(foto => {
@@ -327,7 +331,7 @@
       }
     }, 3800);
 
-    // --- 4. ONDAS DE CORAZÓN DISPARADAS ---
+    // --- 4. ONDAS DE CORAZÓN ---
     const heartWaves = [];
     function createHeartWave() {
       const waveMesh = heartMesh.clone();
@@ -337,7 +341,7 @@
       heartWaves.push({ mesh: waveMesh, scale: heartGroup.scale.x, opacity: 0.65 });
     }
 
-    // --- 5. CORAZONES Y CONEJITOS FLOTANTES ---
+    // --- 5. ELEMENTOS FLOTANTES ---
     const floatingItems = [];
     function createFloatingItem() {
       if (floatingItems.length > 20) return;
@@ -363,7 +367,7 @@
       floatingItems.push({ sprite, speedY: 0.025 + Math.random() * 0.02, opacity: 0.85 });
     }
 
-    // --- 6. FRASES PERSONALIZADAS DISTRIBUIDAS ---
+    // --- 6. FRASES ALREDEDOR ---
     const frases = [
       "Mi Teriancita 🐾", 
       "Te amo con el alma ❤️", 
@@ -407,7 +411,6 @@
     frases.forEach((frase, index) => {
       const sprite = createTextSprite(frase);
       const angle = (index / frases.length) * Math.PI * 2;
-      // Distancia mayor a 27 para no encimarse con el corazón ni con la barra de arriba
       const radius = 27 + (index % 3) * 4; 
       sprite.position.x = Math.cos(angle) * radius;
       sprite.position.y = (Math.sin(index * 2) * 9);
@@ -415,24 +418,28 @@
       galaxyGroup.add(sprite);
     });
 
-    const imagenesPNG = ['snoopy1.png', 'snoopy2.png', 'conejito1.png', 'conejito2.png'];
-    imagenesPNG.forEach((imgSrc, index) => {
+    // --- 7. SNOOPYS FLOTANTES (5 IMÁGENES) ---
+    const imagenesSnoopy = [
+      'snoopy1.png', 'snoopy2.png', 'snoopy3.png', 'snoopy4.png', 'snoopy5.png'
+    ];
+
+    imagenesSnoopy.forEach((imgSrc, index) => {
       photoTextureLoader.load(imgSrc, (texture) => {
         const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
         const sprite = new THREE.Sprite(mat);
-        sprite.scale.set(7, 7, 1);
+        sprite.scale.set(6.5, 6.5, 1);
 
-        const angle = ((index + 0.4) / imagenesPNG.length) * Math.PI * 2;
-        const radius = 23;
+        const angle = ((index + 0.2) / imagenesSnoopy.length) * Math.PI * 2;
+        const radius = 22;
         sprite.position.x = Math.cos(angle) * radius;
-        sprite.position.y = (index % 2 === 0 ? 6 : -6);
+        sprite.position.y = (index % 2 === 0 ? 5 : -5);
         sprite.position.z = Math.sin(angle) * radius;
 
         galaxyGroup.add(sprite);
       });
     });
 
-    // --- LÓGICA INTRO Y MÁQUINA DE ESCRIBIR ---
+    // --- LÓGICA INTRO ---
     const textoIntro = "Tal vez no te puedo dar algo físico o algún detalle muy hermoso, pero no quería quedarme sin hacer nada, así que espero que te guste, Teriancita";
     const typewriterElement = document.getElementById('typewriter');
     const startScreen = document.getElementById('start-screen');
@@ -475,7 +482,6 @@
       if (musicStarted) {
         let currentTime = music.currentTime;
 
-        // SEGUNDOS 18 A 21: AGUJERO NEGRO
         if (currentTime >= 18 && currentTime < 21) {
           if (!holePhase) {
             holePhase = true;
@@ -484,7 +490,6 @@
           camera.position.z -= 0.65;
           starField.rotation.z += 0.09;
         } 
-        // A PARTIR DEL SEGUNDO 21: CORAZÓN Y UNIVERSO
         else if (currentTime >= 21) {
           const scaleVal = THREE.MathUtils.lerp(galaxyGroup.scale.x, 1, 0.08);
           heartGroup.scale.set(scaleVal, scaleVal, scaleVal);
@@ -509,7 +514,6 @@
         }
       }
 
-      // Animación de Ondas
       for (let i = heartWaves.length - 1; i >= 0; i--) {
         const hw = heartWaves[i];
         hw.scale += 0.025;
@@ -525,7 +529,6 @@
         }
       }
 
-      // Animación de Elementos Flotantes
       for (let i = floatingItems.length - 1; i >= 0; i--) {
         const fi = floatingItems[i];
         fi.sprite.position.y += fi.speedY;
@@ -543,7 +546,7 @@
     }
     animate();
 
-    // MODAL CARTA AL HACER CLIC
+    // MODAL CARTA
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     const modal = document.getElementById('cartaModal');
