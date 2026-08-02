@@ -339,7 +339,7 @@
     heartGroup.scale.set(0, 0, 0);
     galaxyGroup.scale.set(0, 0, 0);
 
-    // --- MÁSCARA ALFA CUADRADA CON ESQUINAS REDONDEADAS Y DESVANECIDO SUAVE ---
+    // --- MÁSCARA ALFA CUADRADA CON ESQUINAS REDONDEADAS ---
     function createSquareRoundedMask() {
       const canvas = document.createElement('canvas');
       canvas.width = 512;
@@ -368,7 +368,6 @@
       return new THREE.CanvasTexture(canvas);
     }
 
-    // --- CREACIÓN DE MARCO NEBULOSA PASTELES (HUMO DENSE CUADRADO) ---
     function createSquareNebulaAura() {
       const canvas = document.createElement('canvas');
       canvas.width = 512;
@@ -388,7 +387,7 @@
     const maskSquareTexture = createSquareRoundedMask();
     const auraSquareTexture = createSquareNebulaAura();
 
-    // --- 3. FOTO CUADRADA 1:1 CON BORDE NEBULOSA ---
+    // --- 3. FOTO CUADRADA ---
     const photoTextureLoader = new THREE.TextureLoader();
     const photoGeom = new THREE.PlaneGeometry(6.8, 6.8);
     const photoMat = new THREE.MeshBasicMaterial({
@@ -487,7 +486,7 @@
       floatingItems.push({ sprite, speedY: 0.025 + Math.random() * 0.02, opacity: 0.85 });
     }
 
-    // --- 6. FRASES (CORREGIDAS LAS COMAS FALTANTES) ---
+    // --- 6. FRASES ---
     const frases = [
       "Mi Theriancita 🐾", 
       "Te amo con el alma ❤️", 
@@ -562,7 +561,7 @@
       });
     });
 
-    // --- LÓGICA INTRO Y TRANSICIÓN ROBUSTA ---
+    // --- LÓGICA INTRO SINCRONIZADA CON SEGUNDO 19 ---
     const textoIntro = "Tal vez no te puedo dar algo físico o algún detalle muy hermoso, pero no quería quedarme sin hacer nada, así que espero que te guste, Theriancita";
     const typewriterElement = document.getElementById('typewriter');
     const startScreen = document.getElementById('start-screen');
@@ -570,6 +569,7 @@
 
     let charIndex = 0;
     let musicStarted = false;
+    let holePhase = false;
     let introFinished = false;
 
     function typeWriterEffect() {
@@ -578,37 +578,25 @@
         charIndex++;
         setTimeout(typeWriterEffect, 60);
       } else {
-        const dotsSpan = document.createElement('span');
-        dotsSpan.className = 'loading-dots';
-        typewriterElement.appendChild(dotsSpan);
+        if (!document.querySelector('.loading-dots')) {
+          const dotsSpan = document.createElement('span');
+          dotsSpan.className = 'loading-dots';
+          typewriterElement.appendChild(dotsSpan);
+        }
       }
     }
 
-    function startExperience() {
+    startScreen.addEventListener('click', () => {
       if (!musicStarted) {
         musicStarted = true;
         document.getElementById('hint').style.display = 'none';
-        music.play().catch(e => console.log("Audio esperando interacción o no encontrado"));
+        music.play().catch(e => console.log("Audio en reproducción"));
         typeWriterEffect();
-        
-        // Transición automática a la escena 3D después de escribir la carta
-        setTimeout(() => {
-          finishIntro();
-        }, 9000);
       } else {
-        // Un segundo clic salta directamente la intro
-        finishIntro();
+        // Si vuelve a hacer clic, forzar el segundo 19 directamente
+        music.currentTime = 19;
       }
-    }
-
-    function finishIntro() {
-      if (introFinished) return;
-      startScreen.classList.add('hidden');
-      document.getElementById('ui').classList.add('visible');
-      introFinished = true;
-    }
-
-    startScreen.addEventListener('click', startExperience);
+    });
 
     // --- ANIMACIÓN PRINCIPAL ---
     let time = 0;
@@ -617,18 +605,31 @@
       time += 0.03;
 
       if (musicStarted && !introFinished) {
-        let currentTime = music.currentTime || 0;
-        if (currentTime >= 18 || charIndex >= textoIntro.length) {
-          camera.position.z -= 0.15;
-          starField.rotation.z += 0.02;
+        let currentTime = music.currentTime;
+
+        // TRANSICIÓN EXACTA EN EL SEGUNDO 19
+        if (currentTime >= 19 && currentTime < 21) {
+          if (!holePhase) {
+            holePhase = true;
+            startScreen.classList.add('hidden');
+          }
+          camera.position.z -= 0.65;
+          starField.rotation.z += 0.09;
+        } 
+        else if (currentTime >= 21) {
+          const scaleVal = THREE.MathUtils.lerp(galaxyGroup.scale.x, 1, 0.08);
+          heartGroup.scale.set(scaleVal, scaleVal, scaleVal);
+          galaxyGroup.scale.set(scaleVal, scaleVal, scaleVal);
+
+          if (Math.abs(galaxyGroup.scale.x - 1) < 0.05) {
+            introFinished = true;
+          }
+
+          document.getElementById('ui').classList.add('visible');
         }
       }
 
       if (introFinished) {
-        const scaleVal = THREE.MathUtils.lerp(galaxyGroup.scale.x, 1, 0.08);
-        heartGroup.scale.set(scaleVal, scaleVal, scaleVal);
-        galaxyGroup.scale.set(scaleVal, scaleVal, scaleVal);
-
         const beat = 1 + Math.sin(time * 3) * 0.07 + Math.pow(Math.sin(time * 6), 2) * 0.03;
         heartGroup.scale.set(beat, beat, beat);
 
@@ -675,7 +676,7 @@
     }
     animate();
 
-    // MODAL DE MOMENTOS AL HACER CLIC EN LA FOTO
+    // MODAL DE MOMENTOS AL HACER CLIC EN LA FOTO CUADRADA
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     const modal = document.getElementById('cartaModal');
