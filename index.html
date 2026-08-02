@@ -221,7 +221,8 @@
     <h1>Feliz día de la novia, mi amor. Eres mi Theriancita perfecta. <span class="heart-icon">❤️</span></h1>
   </div>
 
-  <audio id="bg-music" loop src="musica.mp3"></audio>
+  <!-- ELEMENTO AUDIO SIN LOOP PARA PERMITIR REPRODUCIR LA PLAYLIST -->
+  <audio id="bg-music" src="musica.mp3"></audio>
 
   <!-- MODAL DE MOMENTOS -->
   <div class="modal-overlay" id="cartaModal">
@@ -561,11 +562,28 @@
       });
     });
 
+    // --- SISTEMA DE PLAYLIST CONTINUA DE MÚSICA ---
+    // Agrega aquí todas las canciones que quieras en orden
+    const canciones = [
+      'musica.mp3',
+      'musica2.mp3',
+      'musica3.mp3'
+    ];
+    let currentSongIdx = 0;
+
+    const music = document.getElementById('bg-music');
+
+    // Evento que salta automáticamente a la siguiente canción al terminar
+    music.addEventListener('ended', () => {
+      currentSongIdx = (currentSongIdx + 1) % canciones.length;
+      music.src = canciones[currentSongIdx];
+      music.play().catch(e => console.log("Error al reproducir siguiente canción:", e));
+    });
+
     // --- LÓGICA INTRO SINCRONIZADA CON SEGUNDO 19 ---
     const textoIntro = "Tal vez no te puedo dar algo físico o algún detalle muy hermoso, pero no quería quedarme sin hacer nada, así que espero que te guste, Theriancita";
     const typewriterElement = document.getElementById('typewriter');
     const startScreen = document.getElementById('start-screen');
-    const music = document.getElementById('bg-music');
 
     let charIndex = 0;
     let musicStarted = false;
@@ -593,8 +611,10 @@
         music.play().catch(e => console.log("Audio en reproducción"));
         typeWriterEffect();
       } else {
-        // Si vuelve a hacer clic, forzar el segundo 19 directamente
-        music.currentTime = 19;
+        // Si hace un segundo clic en la intro, salta directamente al segundo 19
+        if (currentSongIdx === 0) {
+          music.currentTime = 19;
+        }
       }
     });
 
@@ -605,7 +625,8 @@
       time += 0.03;
 
       if (musicStarted && !introFinished) {
-        let currentTime = music.currentTime;
+        // Nos aseguramos que lea el tiempo de la primera canción
+        let currentTime = (currentSongIdx === 0) ? music.currentTime : 99;
 
         // TRANSICIÓN EXACTA EN EL SEGUNDO 19
         if (currentTime >= 19 && currentTime < 21) {
