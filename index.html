@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Un viaje por nuestros recuerdos</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      overflow: hidden;
+      background-color: #000;
+      font-family: 'Segoe UI', Georgia, serif;
+      color: white;
+      user-select: none;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+    }
+
+    /* CAPA INTRO CINEMÁTICA */
+    #start-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      cursor: pointer;
+      transition: opacity 1.2s ease, visibility 1.2s;
+    }
+    #start-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .typewriter-text {
+      font-size: 1.35rem;
+      line-height: 1.8;
+      max-width: 680px;
+      text-align: center;
+      color: #e0e0e0;
+      font-style: italic;
+      letter-spacing: 1px;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+      min-height: 120px;
+    }
+
+    .loading-dots::after {
+      content: '.';
+      animation: dots 1.5s steps(5, end) infinite;
+    }
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    .initial-hint {
+      position: absolute;
+      bottom: 40px;
+      font-size: 0.8rem;
+      color: #666;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+
+    /* ENCABEZADO PRINCIPAL */
+    #ui {
+      position: absolute;
+      top: 35px;
+      width: 100%;
+      text-align: center;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+    }
+    #ui.visible {
+      opacity: 1;
+    }
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 300;
+      letter-spacing: 1px;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .heart-icon {
+      display: inline-block;
+      animation: heartbeat 1.2s infinite;
+      color: #ff0033;
+    }
+    @keyframes heartbeat {
+      0% { transform: scale(1); }
+      15% { transform: scale(1.3); }
+      30% { transform: scale(1); }
+      45% { transform: scale(1.15); }
+      60% { transform: scale(1); }
+    }
+
+    /* MODAL ELEGANTE */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 100;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-overlay[hidden] {
+      display: none;
+    }
+
+    .card {
+      background: rgba(18, 14, 20, 0.85);
+      border: 1px solid rgba(220, 175, 185, 0.3);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(200, 100, 120, 0.15);
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 35px 30px;
+      position: relative;
+      transform: translateY(20px) scale(0.95);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.active .card {
+      transform: translateY(0) scale(1);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 18px;
+      right: 22px;
+      background: none;
+      border: none;
+      color: #d4a5b0;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .close-btn:hover {
+      color: #ffffff;
+    }
+    .card h2 {
+      color: #f3d5dc;
+      font-weight: 400;
+      letter-spacing: 1.5px;
+      margin-bottom: 20px;
+      font-size: 1.35rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(243, 213, 220, 0.15);
+      padding-bottom: 12px;
+    }
+    .card img {
+      display: block;
+      width: min(100%, 300px);
+      max-height: 34vh;
+      object-fit: contain;
+      margin: 0 auto 18px;
+      border-radius: 12px;
+      box-shadow: 0 0 24px rgba(220, 140, 200, 0.2);
+    }
+    .card img[hidden] {
+      display: none;
+    }
+    .card video {
+      display: block;
+      width: min(100%, 480px);
+      max-height: 42vh;
+      margin: 0 auto 18px;
+      border-radius: 12px;
+      background: #000;
+    }
+    .card video[hidden] {
+      display: none;
+    }
+    .card p {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #e6d8dc;
+      margin-bottom: 15px;
+      text-align: justify;
+      font-weight: 300;
+    }
+    .card-footer {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #d4a5b0;
+      margin-top: 25px;
+      letter-spacing: 3px;
+    }
+    #local-editor-link {
+      position: fixed;
+      z-index: 220;
+      top: 20px;
+      right: 20px;
+      padding: 9px 15px;
+      border: 1px solid rgba(241, 191, 224, 0.4);
+      border-radius: 999px;
+      background: rgba(15, 11, 25, 0.62);
+      color: #ead7ef;
+      font: 12px 'Segoe UI', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    #local-editor-link:hover {
+      background: rgba(85, 49, 92, 0.85);
+    }
+    .memory-date {
+      text-align: center !important;
+      color: #cbb4d3 !important;
+      font-size: 0.85rem !important;
+    }
+    #start-screen {
+      cursor: default;
+      gap: 24px;
+      background: radial-gradient(ellipse at center, #171127 0%, #05040a 55%, #000 100%);
+      overflow-y: auto;
+    }
+    #start-screen h1 {
+      font-size: clamp(1.7rem, 5vw, 3.2rem);
+      font-weight: 300;
+      color: #f7dce9;
+      text-align: center;
+      letter-spacing: 2px;
+      text-shadow: 0 0 24px rgba(238, 139, 202, 0.6);
+    }
+    #start-screen .typewriter-text {
+      font-size: 1rem;
+      min-height: 1.8em;
+    }
+    .launch-menu {
+      width: min(820px, 100%);
+      padding: clamp(20px, 4vw, 36px);
+      border: 1px solid rgba(241, 191, 224, 0.22);
+      border-radius: 24px;
+      background: rgba(8, 7, 16, 0.74);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.46), 0 0 38px rgba(200, 100, 180, 0.1);
+      backdrop-filter: blur(14px);
+    }
+    .launch-heading {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .launch-heading h1 {
+      margin: 0 auto 8px;
+    }
+    .launch-heading p {
+      color: #cbbbd5;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .profile-name-label, .profile-color-label {
+      display: block;
+      color: #ead9ee;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    .profile-name-label input {
+      display: block;
+      width: 100%;
+      margin-top: 7px;
+      padding: 11px 13px;
+      border: 1px solid rgba(241, 191, 224, 0.35);
+      border-radius: 10px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.07);
+      color: white;
+      font: inherit;
+    }
+    .profile-name-label input:focus {
+      border-color: #efb4df;
+      box-shadow: 0 0 0 3px rgba(239, 180, 223, 0.14);
+    }
+    .profile-preview-stage {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: clamp(145px, 22vh, 210px);
+      margin: 14px 0 12px;
+      overflow: hidden;
+      border: 1px solid rgba(241, 191, 224, 0.2);
+      border-radius: 16px;
+      background: radial-gradient(ellipse at center, rgba(91, 61, 110, 0.3), rgba(8, 7, 16, 0.72));
+    }
+    .profile-preview-panel {
+      position: relative;
+      min-width: 0;
+    }
+    .profile-preview-panel + .profile-preview-panel {
+      border-left: 1px solid rgba(241, 191, 224, 0.14);
+    }
+    #profile-preview-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .profile-preview-caption {
+      position: absolute;
+      z-index: 2;
+      left: 10px;
+      right: 10px;
+      bottom: 9px;
+      color: #ead9ee;
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      text-align: center;
+      pointer-events: none;
+      text-shadow: 0 2px 8px #000;
+    }
+    .profile-colors {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .profile-color-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid rgba(241, 191, 224, 0.17);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .profile-color-label input {
+      width: 42px;
+      height: 34px;
+      padding: 2px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      background: transparent;
+      cursor: pointer;
+    }
+    #profile-feedback {
+      min-height: 1.4em;
+      margin: 10px 0 4px;
+      color: #bfdfd7;
+      font: 0.8rem 'Segoe UI', sans-serif;
+    }
+    .launch-menu .launch-button {
+      display: block;
+      margin: 8px auto 0;
+    }
+    .launch-menu .initial-hint {
+      position: static;
+      margin-top: 16px;
+      animation: none;
+      color: #a69ab0;
+      text-align: center;
+    }
+    .launch-button, .hud-button {
+      border: 1px solid rgba(241, 191, 224, 0.55);
+      border-radius: 999px;
+      padding: 12px 22px;
+      color: #fff;
+      background: rgba(111, 58, 112, 0.45);
+      font: inherit;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .launch-button:hover, .hud-button:hover {
+      background: rgba(168, 91, 157, 0.7);
+      transform: translateY(-2px);
+    }
+    #ui {
+      top: 24px;
+      padding: 0 20px;
+    }
+    #ui h1 {
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      color: #f8e9f4;
+    }
+    #hud {
+      position: fixed;
+      z-index: 20;
+      left: 22px;
+      bottom: 20px;
+      max-width: min(460px, calc(100vw - 44px));
+      padding: 14px 18px;
+      border: 1px solid rgba(220, 175, 220, 0.25);
+      border-radius: 14px;
+      background: rgba(13, 10, 23, 0.72);
+      color: #f5eafa;
+      font: 13px/1.6 'Segoe UI', sans-serif;
+      backdrop-filter: blur(10px);
+      pointer-events: none;
+    }
+    #hud strong {
+      display: block;
+      color: #f2c5e7;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+    #camera-mode {
+      display: block;
+      margin-top: 4px;
+      color: #c9b9d8;
+      font-size: 12px;
+    }
+    #multiplayer-status {
+      display: block;
+      margin-top: 3px;
+      color: #a9d8dc;
+      font-size: 12px;
+    }
+    #meteorite-count {
+      display: block;
+      margin-top: 3px;
+      color: #ffd1ed;
+      font-size: 12px;
+    }
+    #flight-help {
+      position: fixed;
+      z-index: 20;
+      right: 22px;
+      bottom: 20px;
+      padding: 12px 15px;
+      border-radius: 12px;
+      color: #e4d8ec;
+      background: rgba(13, 10, 23, 0.65);
+      font: 12px/1.7 'Segoe UI', sans-serif;
+      pointer-events: none;
+      text-align: right;
+    }
+    #crosshair {
+      position: fixed;
+      z-index: 9;
+      left: 50%;
+      top: 50%;
+      width: 7px;
+      height: 7px;
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      box-shadow: 0 0 10px #f4b9e8;
+    }
+    #mobile-controls {
+      display: none;
+      position: fixed;
+      z-index: 25;
+      right: 18px;
+      bottom: 18px;
+      grid-template-columns: repeat(3, 48px);
+      grid-template-rows: repeat(3, 48px);
+      gap: 5px;
+    }
+    #mobile-controls button {
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 12px;
+      background: rgba(35, 25, 50, 0.75);
+      color: white;
+      font-size: 18px;
+      touch-action: none;
+    }
+    #mobile-controls [data-key="KeyW"] { grid-column: 2; grid-row: 1; }
+    #mobile-controls [data-key="KeyA"] { grid-column: 1; grid-row: 2; }
+    #mobile-controls [data-key="KeyS"] { grid-column: 2; grid-row: 2; }
+    #mobile-controls [data-key="KeyD"] { grid-column: 3; grid-row: 2; }
+    #mobile-controls [data-key="Space"] { grid-column: 2; grid-row: 3; }
+    #mobile-controls [data-key="KeyC"] { grid-column: 3; grid-row: 3; }
+    #mobile-controls #mobile-camera-toggle { grid-column: 3; grid-row: 1; font-size: 13px; }
+    #mobile-controls #mobile-jetpack-toggle { grid-column: 1; grid-row: 3; font-size: 13px; }
+    #mobile-controls #mobile-fire-button { grid-column: 2; grid-row: 3; font-size: 16px; }
+    body.interface-hidden #ui,
+    body.interface-hidden #local-editor-link,
+    body.interface-hidden #hud,
+    body.interface-hidden #flight-help,
+    body.interface-hidden #crosshair,
+    body.interface-hidden #mobile-controls {
+      display: none !important;
+    }
+    body.is-pointer-locked,
+    body.is-pointer-locked * {
+      cursor: none !important;
+    }
+    @media (max-width: 700px) {
+      #flight-help { display: none; }
+      #mobile-controls { display: grid; }
+      #hud { bottom: 190px; left: 14px; max-width: calc(100vw - 28px); }
+      #ui { top: 15px; }
+      .card { padding: 30px 22px; }
+      #local-editor-link { top: 12px; right: 12px; }
+      #ui h1 { max-width: calc(100vw - 130px); }
+      .launch-menu { padding: 20px 16px; }
+      .launch-heading h1 { font-size: 1.7rem !important; }
+      .profile-preview-stage { height: 150px; }
+      .profile-colors { grid-template-columns: 1fr; gap: 8px; }
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- MENÚ PRINCIPAL -->
+  <div id="start-screen">
+    <section class="launch-menu" aria-labelledby="menu-title">
+      <header class="launch-heading">
+        <h1 id="menu-title">Prepara tu viaje</h1>
+        <p id="typewriter">Personaliza tu nave y tu traje antes de explorar nuestros recuerdos.</p>
+      </header>
+      <label class="profile-name-label" for="profile-name">
+        Nombre de explorador
+        <input id="profile-name" type="text" maxlength="24" autocomplete="nickname" placeholder="Explorador" />
+      </label>
+      <div class="profile-preview-stage" id="profile-preview-stage" aria-label="Previsualización 3D de tu nave y personaje">
+        <div class="profile-preview-panel"><span class="profile-preview-caption">TU NAVE</span></div>
+        <div class="profile-preview-panel"><span class="profile-preview-caption">TU PERSONAJE</span></div>
+        <canvas id="profile-preview-canvas"></canvas>
+      </div>
+      <div class="profile-colors">
+        <label class="profile-color-label" for="ship-color">Color de la nave<input id="ship-color" type="color" value="#d8d1ec" /></label>
+        <label class="profile-color-label" for="character-color">Color del personaje<input id="character-color" type="color" value="#cac9dd" /></label>
+      </div>
+      <p id="profile-feedback" role="status">Tu perfil se guarda en este navegador.</p>
+      <button class="launch-button" id="launch-button">Entrar al universo ✨</button>
+      <div class="initial-hint" id="hint">WASD para volar · mueve el mouse para dirigir · E para salir de la nave</div>
+    </section>
+  </div>
+
+  <div id="ui">
+    <h1>Nuestro universo de recuerdos <span class="heart-icon">❤️</span></h1>
+  </div>
+  <div id="crosshair" aria-hidden="true"></div>
+  <a id="local-editor-link" href="admin.html">Editor local</a>
+  <div id="hud"><strong id="sector-title">Sector por definir</strong><span id="sector-count">Cargando recuerdos…</span><span id="camera-mode">Nave · primera persona</span><span id="multiplayer-status">Multijugador: preparando sala fija…</span><span id="meteorite-count">Meteoritos destruidos: 0</span></div>
+  <div id="flight-help">W A S D · volar<br>Espacio / C · subir y bajar<br>Shift · acelerar<br>R · cambiar cámara · E · jetpack<br>Clic · capturar mouse y disparar<br>Escape · liberar mouse · P · ocultar interfaz<br>Apunta a los meteoritos para destruirlos</div>
+  <div id="mobile-controls" aria-label="Controles de vuelo">
+    <button type="button" data-key="KeyW" aria-label="Avanzar">↑</button>
+    <button type="button" id="mobile-camera-toggle" aria-label="Cambiar cámara">R ↻</button>
+    <button type="button" data-key="KeyA" aria-label="Izquierda">←</button>
+    <button type="button" data-key="KeyS" aria-label="Retroceder">↓</button>
+    <button type="button" data-key="KeyD" aria-label="Derecha">→</button>
+    <button type="button" data-key="Space" aria-label="Subir">＋</button>
+    <button type="button" data-key="KeyC" aria-label="Bajar">−</button>
+    <button type="button" id="mobile-jetpack-toggle" aria-label="Salir o volver a la nave">E ✦</button>
+    <button type="button" id="mobile-fire-button" aria-label="Disparar laser">✦</button>
+  </div>
+
+  <!-- ELEMENTO AUDIO SIN LOOP PARA PERMITIR REPRODUCIR LA PLAYLIST -->
+  <audio id="bg-music" src="audio/musica.mp3" loop></audio>
+
+  <!-- MODAL DE MOMENTOS -->
+  <div class="modal-overlay" id="cartaModal">
+    <div class="card">
+      <button class="close-btn" id="closeBtn">✕</button>
+      <img id="modalFoto" alt="Fotografía del recuerdo" hidden />
+      <video id="modalVideo" controls playsinline hidden></video>
+      <h2 id="modalTitulo">Momento 1 ✨</h2>
+      <p class="memory-date" id="modalFecha" hidden></p>
+      <div id="cartaContenido">
+        <p id="modalTexto">Escribe aquí el recuerdo de esta foto...</p>
+      </div>
+      <div class="card-footer">✦ ✦ ✦</div>
+    </div>
+  </div>
+
+  <script>
+    // --- HISTORIAS / TEXTOS DE CADA FOTO ---
+    const historiasFotos = {
+      0: { 
+        titulo: "Mi theriansita", 
+        texto: "Todavía recuerdo el día en el que te comiste paté de gato pensando que era un yogurt en sobrecito. Y... nos cagabamos de risa ese día. Eso que nos estábamos conociendo. Pero cada vez que veo la foto, me da risa y ternura jsjsj, esos momentos los cuales siempre voy a atesorar. Te amo, mi theriansita." 
+      },
+      1: { 
+        titulo: "Paseando a Bambie", 
+        texto: "¿Te acuerdas la vez en la que caminamos como chaskis por todo Miraflores cargando a Bambie y nos fuimos hasta un Norkys que estaba más arriba del Kennedy para comprar pollo a la brasa? Y caminamos otra vez como chaskis y terminamos comiendo en el parque de San Ignacio. Estuvo rico porcierto. No lo voy a olvidar para nada, y luego terminamos con dolor de piernas. Pero fue de lo mejor, ademas fue en nuestro primer aniversario." 
+      },
+      2: { 
+        titulo: "Foto para el face", 
+        texto: "Recuerdo que esta vez nos fuimos al KFC. Habíamos comprado unas hamburguesas probando algo nuevo en teoría y luego nos fuimos a comerlo mirando el mar. Fue la vez que estabas triste y te dije que nos fuéramos, que me siguieras nada más. Y así terminamos en Miraflores. Aún lo recuerdo todavía. Primera vez que fuimos a Miraflores esa vez. Pero es otro de los recuerdo que simpre aparecen en mi mente cuando estoy solito y me sacan sorisas." 
+      },
+      3: { 
+        titulo: "Inicio", 
+        texto: "Recuerdo que esta foto fue de las primeras que publicamos en Instagram y, a pesar de que queríamos que no se enteren, amistades y amigos como Zoda se terminaron enterando." 
+      },
+      4: { titulo: "Toda una diva", texto: "Aqui receurdo que te puse mi polera, y te quedo perfecto, enserio!! la mayoria de mis casacas o accesorios te quedan divinos, resalta aun mas tu bellesa mi amorcito, aqun sin no lo cesites, porque incluso sin arreglarte eres completamente divina, TE AMO." },
+      5: { titulo: "2 angelitos", texto: "Como olvidar cuadno preguntamos a tu beba, como serian nuestros hijitos, Dante y Danae, y aunque te dije esa vez, que yo quiero un niño, te juro que una princesita me haria muy feliz, daria todo por ella, de eso nunca lo dudes amor." },
+      6: { titulo: "Mi sugar", texto: "No solo en este momento, sino que desde que nos conocemos, me has entendido cuando no eh tenido dinero, me acompañabas a clases, para poder pasar tiempo juuntos e incluso me invitavas tus cosas favorita, y hasta ahora lo haces, te juro que nadie lo ha hecho por mi ante, eso valoro demasiad de ti, y no me hace falta mas razones para elejirte siempre por encima de todo." },
+      7: { titulo: "SQUINKLES FACIALES", texto: "Despues del rochimochi parcial, no hicimos limpieza facial, ojito que primera vez que me hacia uno, y fue de lo mejor, por que estaba a tu lado, te juro que cosas asi talvez no se me ocurran ami, pero siempre te dire si a probar cosas nueva, y quiero que tu tambien digas si cuando las proponga." },
+      8: { titulo: "Pulseritas", texto: "COMO OLVIDAR, QUE SUFRI VARIOS INTENTOS PARA HACERTE TU PULSERITA, Y AL FINAL QUEDO BONITA, ME GUSTO QUE TE ENCANTARA AMOR AUNQUE YA NO LAS USEMOS" },
+      9: { titulo: "TE AMOOO", texto: "Este dia.., casi termina mal, eneserio me acuerdo que pasamos un mal rato, pero no me arrepiento de arrodillarme y hacerte la promesa, que quiero estar contigo, y pasar de todo contigo en la malas y en las buenas amorcito" },
+      10: { titulo: "Lammadas y desvelos", texto: "Aqui todavia nos conociamos, enserio momentos como este se quedan muy guardados en mi coranzocito, jsjsj, no olvidemos que estas fotos fue antes que me diera baricela, pero en fin solo contigo los desvelos son los mejores, te amo theriancita" },
+      11: { titulo: "Mal humor", texto: "Queria poner esta foto, para recordarte que aunque te despierte de mal humor siempre, yo te amo, apesar de que te las agarresconmigo en ese momento, te amo, nada va cambiar, asi que sueña bonito amorcito" },
+      12: { titulo: "KFC", texto: "Pongo esta foto para que momento asi sigan mas adelante, y tambien recordemos que esa ves fue cuando compramos kfc miraflores y nos fuimos a comer mirando el mal, se que puse una foto en el mismo lugar antes, pero igual me gusto esta con el filtro de dalmatas" },
+      13: { titulo: "Me dejas enbobado", texto: "Nose por que aveces no te crees las cosas que dicen sobre ti, eres mul impresionante amor, aparte de bonita, eres perseverante, dedicada, eso si hay que manejar un poquito el estres , pero siempre tienes fuerzas cuando te lo propones, se que normalmente eres ensible, pero tambien tienes tu caracter, lo cual me gusta de ti, ensi amor lo que quiero decir, es que tu eres tu , y no eres inferior a nadie puedes hacer todo lo que te propones, y yo te apoyo en cada idea que se te prenda si?" },
+      14: { titulo: "TE AMOOOOOOOOOOOOOOOOOOOOOOOOOOOO", texto: "En esos ojitos, mi sexto sentido" }
+    };
+    window.memoryStories = historiasFotos;
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="firebase-multiplayer.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+CONTEXTO DEL PROYECTO — VIAJE ESPACIAL DE RECUERDOS
+===================================================
+
+Objetivo
+--------
+Crear una experiencia personal publicada como sitio estático en GitHub Pages:
+la persona visitante pilota una nave por un espacio 3D y descubre recuerdos
+agrupados por mes y año. Cada recuerdo tiene un medio (foto o video), título,
+descripción y fecha.
+
+El sitio publicado es de solo lectura. No se usa Supabase ni un servidor para
+subir contenido. Quien administra el proyecto prepara los archivos en su copia
+local y publica los cambios a GitHub.
+
+Estado funcional
+----------------
+- index.html carga Three.js r128 desde CDN y conserva las 15 fotos, textos y
+  música originales.
+- El menú principal permite cambiar el nombre, color de la nave y color del
+  personaje con vista previa 3D. Las preferencias se guardan en localStorage
+  por navegador y el nombre/colores se comparten con otros jugadores.
+- app.js construye el universo 3D, con planetas por mes, fotos orbitando,
+  estrellas, partículas de corazones, HUD y controles de vuelo.
+- Las 15 fotos originales siguen sin fechas confirmadas: se muestran en
+  “Sector por definir”. No inferir ni inventar fechas.
+- img/recuerdos.json es el manifiesto estático de nuevos recuerdos. La app lo
+  carga al iniciar y agrupa cada entrada usando capturedAt.
+- window.memoryUniverse.addMemory(...) permite añadir un recuerdo en tiempo
+  real durante la sesión. La persistencia se hace guardando el manifiesto,
+  no mediante ese API.
+- Las vistas de foto y video se abren en el mismo modal. La vista orbital de
+  video usa VideoTexture con reproducción silenciada; el modal tiene controles.
+- La cámara alterna entre primera y tercera persona con R. E saca al astronauta
+  original de la nave o lo devuelve. En el jetpack la nave permanece visible y
+  el astronauta se mueve con los controles de vuelo.
+- En escritorio: WASD para moverse, Espacio/C para subir y bajar, Shift para
+  acelerar, clic para capturar el mouse y disparar, mover el mouse para apuntar,
+  Escape para liberar el mouse y E para jetpack. Se usa Pointer Lock cuando el
+  navegador lo admite; si lo rechaza, se oculta el cursor como alternativa. P
+  oculta o muestra toda la interfaz. En móvil hay botones para moverse, alternar
+  cámara, jetpack y disparar.
+- Los disparos solo destruyen meteoritos geométricos de estilo romántico; cada
+  impacto crea partículas y reaparece otro meteorito. No pueden dañar planetas,
+  recuerdos, naves ni personajes.
+- Las imágenes de img/recursos/ flotan a distancia con estelas cósmicas de
+  partículas; la música de audio/musica.mp3 se reproduce en loop.
+- La nave se inclina al girar y emite estelas brillantes desde las alas mientras
+  se mantiene Shift. Nave y astronauta tienen animaciones sutiles; los planetas
+  capturan el entorno de la escena con CubeCamera (una captura de baja
+  resolución cada 1.5 segundos, turnándose entre planetas); nave y astronauta
+  usan el entorno espacial generado localmente como reflejo base.
+- No se está reproduciendo Tuffy/Nibbles. El astronauta y la nave son modelos
+  geométricos originales.
+
+Agregar y publicar recuerdos
+----------------------------
+1. Sirve la carpeta del proyecto por HTTP local, por ejemplo en Windows:
+
+     python -m http.server 8000
+
+   Abre http://localhost:8000/admin.html en Chrome o Edge reciente.
+2. Pulsa “Elegir carpeta img” y selecciona la carpeta img que está junto a
+   index.html. Autoriza escritura explícitamente.
+3. Completa el medio, título, descripción y fecha. Se admiten JPG, JPEG, PNG,
+   WebP, GIF, MP4 y WebM. Los medios se guardan en img/recuerdos/ y el
+   manifiesto en img/recuerdos.json. La ruta multimedia será
+   img/recuerdos/archivo.jpg o img/recuerdos/archivo.mp4.
+4. Comprueba el resultado en index.html servido localmente.
+5. Publica los cambios de img/ y cualquier otro archivo
+   modificado mediante GitHub Desktop o git push.
+
+El editor usa la File System Access API del navegador; requiere localhost o
+HTTPS y un navegador compatible. Si se abre desde GitHub Pages, los cambios
+solo se escriben en la carpeta local que la persona elija y autorice. GitHub
+Pages no permite que el navegador cambie el sitio publicado automáticamente.
+No se pide ni se guarda una contraseña: la autorización del selector de
+carpetas es local, no una autenticación del sitio. El enlace al editor no debe
+presentarse como una barrera de seguridad ni como una carga pública.
+GitHub Pages tampoco limita por sí solo el acceso a una persona. Publica
+únicamente contenido que pueda ser visible para quienes puedan abrir el enlace;
+no incluyas recuerdos que necesiten autenticación o privacidad.
+
+Formato de recuerdos.json
+-------------------------
+El archivo img/recuerdos.json contiene una lista de objetos como:
+
+  {
+    "id": "memory-id-unico",
+    "image": "img/recuerdos/archivo.mp4",
+    "mediaType": "video",
+    "title": "Título",
+    "description": "Descripción",
+    "capturedAt": "AAAA-MM-DD"
+  }
+
+Para una foto, usar "mediaType": "image". capturedAt es obligatorio para las
+entradas nuevas y determina el grupo mes/año. Los videos deben usar formatos
+que el navegador pueda reproducir; MP4/H.264 y WebM son las opciones prácticas.
+Los medios quedan incluidos en el repositorio y son públicos junto con GitHub
+Pages.
+
+Estructura y restricciones
+--------------------------
+- index.html: interfaz, estilos, las historias originales y carga de app.js.
+- app.js: escena, vuelo, órbitas, reproducción de medios y manifiesto.
+- firebase-config.js: valores públicos de configuración del proyecto Firebase.
+- firebase-multiplayer.js: acceso anónimo, presencia de jugadores y sincronía.
+- database.rules.json: reglas para copiar a Firebase Realtime Database; subir
+  este archivo a GitHub no las instala automáticamente en Firebase.
+- admin.html: herramienta local para copiar un medio y editar el manifiesto.
+- img/fotos/: las 15 fotos originales, agrupadas en un solo lugar.
+- img/recuerdos/: videos y medios nuevos añadidos desde el editor.
+- img/recursos/: imágenes decorativas conservadas.
+- img/recuerdos.json: manifiesto de recuerdos añadidos.
+- audio/musica.mp3: música opcional de fondo.
+- El editor limita cada archivo nuevo a 90 MB para mantenerse bajo el límite
+  habitual de archivos individuales de GitHub.
+- Three.js se descarga de un CDN; la experiencia necesita conexión a internet
+  para obtener esa dependencia.
+- No hay package.json, bundler ni backend propio. El multijugador depende del
+  servicio remoto Firebase Realtime Database y Authentication.
+- Teclas/controles principales: WASD, Espacio/C, Shift, R, E, clic y P;
+  Escape libera el mouse capturado. En móvil se dispara con el botón ✦.
+- La carpeta de trabajo actual no fue detectada como un repositorio Git. Para
+  publicar desde ella, primero debe estar vinculada/configurada con el
+  repositorio de GitHub correspondiente.
+
+Multijugador: factibilidad y requisito
+--------------------------------------
+La integración inicial usa Firebase Realtime Database con Authentication
+anónima y una sala fija llamada "recuerdos-space". Cada navegador publica su
+posición/rotación, nombre, colores y si está usando jetpack/impulso; los otros
+clientes dibujan su nave y astronauta. Las actualizaciones se limitan a 8 por
+segundo y se retira la presencia al desconectarse.
+
+Configuración necesaria para que conecte:
+1. Crear un proyecto Firebase, registrar una aplicación Web y crear Realtime
+   Database.
+2. En Authentication, habilitar el proveedor Anonymous.
+3. Verificar que apiKey, authDomain, databaseURL, projectId y appId en
+   firebase-config.js correspondan al proyecto. Estos valores de cliente son
+   públicos; nunca pegar una service account o clave privada en el frontend.
+4. Publicar las reglas de database.rules.json en la sección Realtime Database >
+   Rules. Las reglas requieren usuarios autenticados y solo permiten que cada
+   UID escriba su propia presencia; también validan nombre y colores. Hay que
+   volver a publicarlas cuando cambie el esquema de datos. Realtime Database
+   Rules no puede contar jugadores con numChildren(), así que estas reglas no
+   imponen un máximo de dos; para garantizarlo se necesita un backend confiable
+   o rediseñar la sala con dos espacios reservados.
+5. Publicar en GitHub Pages los nuevos firebase-config.js,
+   firebase-multiplayer.js y database.rules.json además de los archivos
+   existentes. Debe haber conexión a internet para descargar Firebase SDK.
+6. Abrir la URL desde dos dispositivos/navegadores diferentes. El HUD mostrará
+   estado de conexión y cuántos jugadores están conectados.
+
+IMPORTANTE: es una sala fija, sin contraseña/código secreto. La autenticación
+anónima da a cada visitante un UID, pero cualquier persona que encuentre el
+enlace público puede entrar. Las reglas limitan lo que puede escribir, no
+convierten una página pública en privada. Para jugar
+solo con la pareja, añadir después un secreto compartido validado por un
+backend/servicio seguro o cambiar la sala por emparejamiento con invitación;
+un secreto guardado en el JavaScript público no es seguro. La sincronización
+de posiciones tampoco es WebRTC: Firebase transporta los estados.
+
+Validación realizada
+--------------------
+- node --check app.js y la comprobación sintáctica del script inline de
+  admin.html pasan.
+- En localhost, la vista previa 3D del menú refleja cambios de nombre y color,
+  las preferencias sobreviven a una recarga y “Entrar al universo” retira la
+  vista previa y muestra la interfaz de vuelo.
+- Tras reorganizar los medios, el navegador cargó las 15 fotos originales y el
+  video del manifiesto (16 de 16 medios listos).
+- Se comprobaron los 32 meteoritos y cinco recursos espaciales en la escena,
+  creación de disparos con clic y con el botón móvil, ocultar/restaurar la
+  interfaz con P, liberar el cursor con Escape y el atributo loop del audio.
+- Pendiente comprobar un impacto y destrucción de meteorito en una sesión con
+  la animación del navegador activa, Pointer Lock nativo en Chrome/Edge y que la
+  pista de audio continúe al alcanzar el final del archivo.
+- En navegador local, las 15 fotos existentes cargaron sin errores de runtime.
+- Se probó primera/tercera persona, salir y regresar de la nave, y el botón
+  táctil de jetpack. La cámara queda detrás; la nave permanece visible al
+  explorar con el astronauta.
+- Se probó la creación de un grupo por fecha mediante addMemory y la lectura de
+  un manifiesto de prueba interceptado en navegador.
+- Se comprobó el guardado del formulario de editor con un adaptador simulado
+  de la File System Access API: creó la ruta de medio y una entrada válida de
+  foto y de video en el manifiesto. No se escribió ningún archivo de prueba en
+  el proyecto.
+- Se probó en navegador la actualización de dirección vertical con el mouse,
+  movimiento en tercera persona, reflejos dinámicos sin errores de WebGL y
+  carga de recuerdos.
+- El navegador alcanza Firebase, pero la escritura recibió PERMISSION_DENIED:
+  hay que publicar en la consola las reglas actuales de database.rules.json,
+  que incluyen los nuevos campos de nombre y colores, y recargar para probar
+  el multijugador. No se verificó la sincronía con dos dispositivos reales.
+
+Pendiente de probar manualmente: permisos reales del selector de carpetas en
+Chrome/Edge, reproducción de un video real y publicación mediante commit/push.
+No se deben asignar fechas inventadas a las 15 fotos existentes.

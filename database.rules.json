@@ -1,0 +1,58 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "recuerdos-space": {
+        "players": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['position', 'rotation', 'shipPosition', 'shipRotation', 'jetpack', 'boosting', 'updatedAt'])",
+            "position": {
+              ".validate": "newData.hasChildren(['x', 'y', 'z'])",
+              "x": { ".validate": "newData.isNumber() && newData.val() >= -100000 && newData.val() <= 100000" },
+              "y": { ".validate": "newData.isNumber() && newData.val() >= -100000 && newData.val() <= 100000" },
+              "z": { ".validate": "newData.isNumber() && newData.val() >= -100000 && newData.val() <= 100000" },
+              "$other": { ".validate": false }
+            },
+            "rotation": {
+              ".validate": "newData.hasChildren(['x', 'y', 'z'])",
+              "x": { ".validate": "newData.isNumber() && newData.val() >= -7 && newData.val() <= 7" },
+              "y": { ".validate": "newData.isNumber() && newData.val() >= -7 && newData.val() <= 7" },
+              "z": { ".validate": "newData.isNumber() && newData.val() >= -7 && newData.val() <= 7" },
+              "$other": { ".validate": false }
+            },
+            "shipPosition": {
+              ".validate": "newData.hasChildren(['x', 'y', 'z'])",
+              "x": { ".validate": "newData.isNumber() && newData.val() >= -100000 && newData.val() <= 100000" },
+              "y": { ".validate": "newData.isNumber() && newData.val() >= -100000 && newData.val() <= 100000" },
+              "z": { ".validate": "newData.isNumber() && newData.val() >= -100000 && newData.val() <= 100000" },
+              "$other": { ".validate": false }
+            },
+            "shipRotation": {
+              ".validate": "newData.hasChildren(['x', 'y', 'z'])",
+              "x": { ".validate": "newData.isNumber() && newData.val() >= -7 && newData.val() <= 7" },
+              "y": { ".validate": "newData.isNumber() && newData.val() >= -7 && newData.val() <= 7" },
+              "z": { ".validate": "newData.isNumber() && newData.val() >= -7 && newData.val() <= 7" },
+              "$other": { ".validate": false }
+            },
+            "jetpack": { ".validate": "newData.isBoolean()" },
+            "boosting": { ".validate": "newData.isBoolean()" },
+            "updatedAt": { ".validate": "newData.isNumber()" },
+            "name": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 24"
+            },
+            "shipColor": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 16777215"
+            },
+            "characterColor": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 16777215"
+            },
+            "$other": { ".validate": false }
+          }
+        }
+      }
+    }
+  }
+}
